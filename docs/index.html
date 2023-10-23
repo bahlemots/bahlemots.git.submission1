@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Bahle Motshegoa (MTSNOB004)">
-<meta name="dcterms.date" content="2023-10-08">
+<meta name="dcterms.date" content="2023-10-23">
 
-<title>bahlemots.github.io - Assignment 1: Predict the President (Neural Networks)</title>
+<title>Data Science for Industry 2023 - Assignment 1: Predict the President (Neural Networks)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -108,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">bahlemots.github.io</span>
+    <span class="navbar-title">Data Science for Industry 2023</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -120,10 +86,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
  <span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
- <span class="menu-text">About</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -137,7 +99,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#tokenization" id="toc-tokenization" class="nav-link" data-scroll-target="#tokenization">Tokenization</a>
+  <ul class="collapse">
+  <li><a href="#stemming" id="toc-stemming" class="nav-link" data-scroll-target="#stemming">Stemming</a></li>
+  <li><a href="#removing-stop-words" id="toc-removing-stop-words" class="nav-link" data-scroll-target="#removing-stop-words">Removing stop words</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#feature-selection" id="toc-feature-selection" class="nav-link" data-scroll-target="#feature-selection">Feature selection</a>
+  <ul class="collapse">
+  <li><a href="#reducing-sparsity" id="toc-reducing-sparsity" class="nav-link" data-scroll-target="#reducing-sparsity">Reducing sparsity</a></li>
+  </ul></li>
+  <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model">Fitting the Model</a>
+  <ul class="collapse">
+  <li><a href="#model-1-bag-of-words-frequency-of-words-count" id="toc-model-1-bag-of-words-frequency-of-words-count" class="nav-link" data-scroll-target="#model-1-bag-of-words-frequency-of-words-count">Model 1: Bag-of-Words: Frequency of words count</a></li>
+  <li><a href="#model-2-tf-idf-weighted-frequency-count" id="toc-model-2-tf-idf-weighted-frequency-count" class="nav-link" data-scroll-target="#model-2-tf-idf-weighted-frequency-count">Model 2: TF-IDF: Weighted Frequency Count</a></li>
+  </ul></li>
+  <li><a href="#plagiarism-declaration" id="toc-plagiarism-declaration" class="nav-link" data-scroll-target="#plagiarism-declaration">Plagiarism declaration</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -161,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 8, 2023</p>
+      <p class="date">October 23, 2023</p>
     </div>
   </div>
   
@@ -171,16 +157,493 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>This is a Quarto website.</p>
-<p>To learn more about Quarto websites visit <a href="https://quarto.org/docs/websites" class="uri">https://quarto.org/docs/websites</a>.</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The State of the Nation Address (SONA) delivered by the President of South Africa is a significant annual event. It serves as a platform for the nation’s leader to engage with citizens, government officials, and international observers. This address offers a pivotal opportunity for the President to assess the nation’s current state, articulate government priorities, and lay out policies and plans for the future. It represents a moment that encapsulates the nation’s aspirations in politics, society, and the economy.</p>
+<p>In the context of this research project, we have access to a dataset comprising a total of 36 text files, each representing speeches delivered by six different presidents during the period from 1994 to 2023. The dataset includes 7 speeches from Nelson Mandela, 10 from Mbeki, 1 from Motlanthe, 1 from Ramaphosa, 10 from Zuma, and 1 from de Klerk. The examination reveals an imbalance within the data, highlighting the importance of implementing a stratified sampling approach during the division of the data into training and test sets. This approach involves stratifying the samples based on the target variable (president) to guarantee that the selected data accurately mirrors the characteristics of the original dataset.</p>
+<p>The primary objective of this analysis is to utilize the text data alongside a feed forward neural network to predict which of the six presidents delivered a specific speech. The outcomes generated by the neural network will be compared with those of other predictive models, such as a Naive Bayes classifier and a Support Vector Machine. This comparative analysis aims to enhance our understanding of the most effective approach for attributing speeches to their respective presidents based on the text content.</p>
+</section>
+<section id="data-preparation" class="level1">
+<h1>Data Preparation</h1>
+<p>The initial phase of data preparation involved parsing each speech but excluding the first two lines from each speech as they contain the date the speech was rendered and the welcome address. The speeches were then broken down into individual sentences, and attributed to the respective president. Additionally, a unique sentence ID was assigned to each parsed sentence. As a result, the finalized dataset comprises a total of 6877 sentences. President Zuma rendered most of the sentences, accounting for 30% of all sentences in the database, followed by 27% from President Ramaphosa. President Motlanthe and President De Klerk had the least sentence, accounting only for only 3% and 1% of all sentences, respectively.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 1. Total number of sentences rendered in a speech per president</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">deKlerk</td>
+<td style="text-align: left;">Mandela</td>
+<td style="text-align: left;">Mbeki</td>
+<td style="text-align: left;">Motlanthe</td>
+<td style="text-align: left;">Ramaphosa</td>
+<td style="text-align: left;">Zuma</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">71</td>
+<td style="text-align: left;">1013</td>
+<td style="text-align: left;">1614</td>
+<td style="text-align: left;">208</td>
+<td style="text-align: left;">1886</td>
+<td style="text-align: left;">2085</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The next step of data preparation involved the conversion of sentences through methods such as tokenization, stemming, and removing stop words in order to render the data more suitable for analysis. This process aims to enhance the quality and structure of the textual data for further analysis. The pre-processing techniques employed are as detailed below:</p>
+<section id="tokenization" class="level2">
+<h2 class="anchored" data-anchor-id="tokenization">Tokenization</h2>
+<p>This is a process of breaking down a text into individual words or tokens. Each word or punctuation mark is considered a token. For instance, the sentence “The time will come when our nation will honour” would be tokenized into (““The”, “time”, “will”, “come”, “when”, “our”,“nation”,“will”,“honour”).</p>
+<section id="stemming" class="level3">
+<h3 class="anchored" data-anchor-id="stemming">Stemming</h3>
+<p>This is text normalization technique where words are reduced to their root or base form. This helps to group words with the same root together. For example in the data the word “thoughts” is stemmed to “thought”, and “memory” is stemmed to “memori”.</p>
+</section>
+<section id="removing-stop-words" class="level3">
+<h3 class="anchored" data-anchor-id="removing-stop-words">Removing stop words</h3>
+<p>Removing stop words is a process of eliminating common words like “the,” “and,” “is,” which don’t carry much meaning in text analysis and may skew our results if included in the analysis. For example, in our data the token (“the” “time” “will” “come” “when” “our” “nation” “will” “honour” “the” “memory”), will be reduced to (“time” “come” “nation” “honour” “memory” “sons” “daughters” “mothers”).</p>
+<p>To proces the data using the techniques detailed above, the data corpus object using the quanteda package. A corpus is a collection of sentences. The corpus object was then converted into tokens , removing punctuation. The tokens were converted into a “Document-Feature Matrix” (dfm) which is a crucial component for analyzing and modeling text data. In this process the tokens are converted into a lowercase, stemmed and stop words are removed.</p>
+<p>The output below shows that the dfm object has 6 871 documents and 8 470 features (total number of unique words). The dfm matrix contains a total 113 584 word, but only 8 471 words are unique. However, the data is 99.81% sparse, this means that 99.86% of the values in the matrix are 0. This is a very high number. This tells us that only 0.19% of the 6 871 sentences(documents) contains all the 8 470 words.</p>
+<hr>
+<div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<pre><code>Document-feature matrix of: 6,877 documents, 8,470 features (99.81% sparse) and 2 docvars.
+       features
+docs    time come nation honour memori son daughter mother father youth
+  text1    1    1      1      1      1   1        1      1      1     1
+  text2    0    1      0      0      0   0        0      0      0     0
+  text3    0    0      0      0      0   0        0      0      0     0
+  text4    0    0      0      0      0   0        0      0      0     0
+  text5    0    0      0      0      0   0        0      0      0     0
+  text6    0    0      0      0      0   0        0      0      0     0
+[ reached max_ndoc ... 6,871 more documents, reached max_nfeat ... 8,460 more features ]</code></pre>
 </div>
+</div>
+<hr>
+</section>
+</section>
+</section>
+<section id="feature-selection" class="level1">
+<h1>Feature selection</h1>
+<section id="reducing-sparsity" class="level3">
+<h3 class="anchored" data-anchor-id="reducing-sparsity">Reducing sparsity</h3>
+<p>One can reduce the sparseness of the matrix by tuning the <strong>dfm</strong> parameters. In this analysis we are only going to consider words that appear in at least 200 of the documents, this means the word must appear at least 200 times. This reduces the feature space from 8 470 to 75 and reduces sparsity from 99,81% to 94.62%. The data is still extremely sparse, but the higher we set the <strong>min_docFreq</strong> parameter, the more features we will loose.</p>
+<hr>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Document-feature matrix of: 6,877 documents, 75 features (94.62% sparse) and 2 docvars.
+       features
+docs    time nation honour us south african world among countri mani
+  text1    1      1      1  1     1       2     1     0       0    0
+  text2    0      0      0  0     1       2     1     1       0    0
+  text3    0      0      0  0     0       0     0     0       0    0
+  text4    0      0      0  0     1       2     0     0       0    0
+  text5    0      0      0  0     0       0     0     0       0    0
+  text6    0      0      0  0     0       0     0     0       1    1
+[ reached max_ndoc ... 6,871 more documents, reached max_nfeat ... 65 more features ]</code></pre>
+</div>
+</div>
+<hr>
+<p>The dfm object is a Bag-of-Words (BoW) matrix which contains 75 words (feature) and can be converted into a dataframe. Table 2 shows that in one of the speeches rendered by Ramaphosa, he mentioned the word <em>south</em> 10 times, while Mbeki mentioned the word <em>time</em> 4 times in one of his speeches.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 2: Bag of words illustration of the matrix</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">president</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">nation</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">honour</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">us</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">south</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">african</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">world</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Ramaphosa</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mbeki</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 3: Ten most used words in the SONA dataset</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">year</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">govern</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">south</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">nation</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">work</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">peopl</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">develop</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">also</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">countri</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">african</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1301</td>
+<td style="text-align: right;">1230</td>
+<td style="text-align: right;">934</td>
+<td style="text-align: right;">923</td>
+<td style="text-align: right;">919</td>
+<td style="text-align: right;">910</td>
+<td style="text-align: right;">835</td>
+<td style="text-align: right;">757</td>
+<td style="text-align: right;">752</td>
+<td style="text-align: right;">696</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>A further analysis was conducted to explore the top 10 words. Table 3 shows that the words <strong>year</strong>, <strong>govern</strong> (stemmed from government), <strong>south</strong> are the 3 most used words in the dataset. Figure 1 shows the top words (relative frequency) used by each president. The size of each word corresponds to its relative frequency or importance within the group’s text data. Larger words are relatively more frequent or prominent, while smaller words are less so. For example, President Zuma used the word <strong>Work</strong> more often in his speech, President Mbeki used the word <strong>programm</strong> more often in his speech, while the most common word choice for President Ramaphosa are <strong>business</strong> and <strong>invest</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure1: Relative frequency of words used by each president</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="fitting-the-model" class="level1">
+<h1>Fitting the Model</h1>
+<p>In this section, we conduct a comparative analysis of three predictive algorithms: Neural Network, Naive Bayes, and a Logistic Regression. We evaluate their performance using three distinct text processing techniques, which are as follows:</p>
+<ol type="1">
+<li><strong>Bag of Words using frequency word count</strong>: This technique involves representing text data by creating a vocabulary of unique words and counting the frequency of each word in a document.</li>
+<li><strong>ID-TDF(Term Frequency-Inverse Document Frequency):</strong> TF-IDF is a numerical statistic used in text mining and information retrieval to evaluate the importance of a word within a document relative to a collection of documents. It quantifies the relevance of a term in a specific document compared to its relevance across a corpus of documents.</li>
+</ol>
+<section id="model-1-bag-of-words-frequency-of-words-count" class="level2">
+<h2 class="anchored" data-anchor-id="model-1-bag-of-words-frequency-of-words-count">Model 1: Bag-of-Words: Frequency of words count</h2>
+<p>The input data for this model represent individual features, and the observations denote the frequency of each word’s appearance within each sentence spoken by each president (the target). The model is trained on a reduced dataset, including only those features that occur in at least 200 sentences. This results in a feature space consisting of 74 unique words and a dataset of 6,877 observations. The data is split into 3 datasets, the training set (60%), validation set (20%) and the test set (20%).</p>
+<p>Considering that the data employed in model 1 encompasses the absolute counts of word occurrences within each observation, the training dataset is subjected to standardization. This process aims to mitigate the undue impact of words with a broader range of values. For instance, the word “nation” appears in sentences ranging from 0 to 18 times, whereas “well” spans from 0 to 2 uses. The validation and test datasets are likewise standardized using the means and standard deviations obtained from the training data. The target variable is converted into a vector of 1 and 0 using a one hot encoding technique which transforms the categorical labels into a binary matrix format.</p>
+<hr>
+<p><strong>Feed Forward Neural Network</strong></p>
+<p>The first model fitted is a neural network designed for a multi-class classification problem with 6 classes. The ReLU activation function is used in the hidden layers to introduce non-linearity, and the softmax activation function is used in the output layer to produce class probabilities.</p>
+<p>The categorical cross-entropy loss is chosen as an loss function for multi-class classification tasks, and the Adam optimizer with a learning rate of 0.01 is used to update the model’s weights during training.</p>
+<p>The model underwent 50 training epochs with batches of 32 samples each. The model fit resulted in a validation accuracy of just 37.84%, furthermore the neural network assigned non of the predictions to De Klerk.</p>
+<p><strong>Multinomial Logistic Regression</strong></p>
+<p>For the logistic regression, an output layer using activation = “softmax” was chosen as it is a appropriate for multi-class classification. It will provide class probabilities for each of the 6 classes. The loss function was also set to “categorical_crossentropy”, which is the standard choice for multi-class problems.</p>
+<p>With a logistic regression the model validation accuracy is 43.72%, this is a 588 basis points uplift in performance compared to the neural network. The logistic regression model assigned none of the predictions to Motlhante and De Klerk.</p>
+<p><strong>Support Vector Machine</strong></p>
+<p>A support vector machine (SVM) model was trained with a radial kernel, which is a suitable choice when there’s uncertainty about the data’s underlying structure. The radial kernel is adept at capturing complex decision boundaries, which is especially important in multi-class classification scenarios where linear boundaries may not suffice. A low gamma value (0.1) was selected to create a more lenient decision boundary, a valuable approach for multi-class datasets with potential class overlap. To mitigate overfitting, the cost parameter was set to a high value of 10, increasing the penalty for misclassification. SVM can effectively handle the categorical target variable in its original form, eliminating the need for one-hot encoding to transform the target into a binary matrix.</p>
+<p>The model’s validation accuracy is 39 %. This is a 79 basis point uplift from the neural network, but lower that the results obtained using a logistic regression.</p>
+<hr>
+<p>For the BoW frequency count text processing technique, the logistic regression yields superior results. Table 4 shows that the algorithm is unable to assign any prediction to De Klerk and Motlanthe. The model performs the best when predicted words by President Zuma. The president has 417 words in the corpus, and the model accurately predicted 56% (test accuracy) . President Ramaphosa has 377 words in the corpus, and the model accurately predicted 50% of his words. The model is ineffective at predicting words said by President Mandela. The president has 203 words in the corpus, however the model only accuracy predicts 21% of those words.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 4: Actual (row) vs Predicted (column) Results by logistic Regression on BoW</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">deKlerk</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mandela</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mbeki</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Motlanthe</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Ramaphosa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Zuma</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">deKlerk</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mandela</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">203</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mbeki</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">91</td>
+<td style="text-align: right;">323</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Motlanthe</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ramaphosa</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">153</td>
+<td style="text-align: right;">377</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zuma</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">232</td>
+<td style="text-align: right;">417</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</section>
+<section id="model-2-tf-idf-weighted-frequency-count" class="level2">
+<h2 class="anchored" data-anchor-id="model-2-tf-idf-weighted-frequency-count">Model 2: TF-IDF: Weighted Frequency Count</h2>
+<p>TF-IDF, or Term Frequency-Inverse Document Frequency, is a numerical representation that combines two key components. It involves a log transformation of the word frequency count within a document, and it also accounts for the word’s significance across the entire corpus.</p>
+<p>For example, consider the sentence “The certainties that come with age tell me that,” which consists of a total of 9 words. The word “that” appears 2 times in this sentence. To calculate the Term Frequency (TF) for “that” in this sentence, you take the ratio of its frequency to the total words, resulting in (2/9).</p>
+<p>However, it’s equally important to consider how often the word “that” appears across all sentences in the corpus. If, for instance, it appears in only 4 out of 9 sentences, the Inverse Document Frequency (IDF) is determined as log(9/4). Consequently, the TF-IDF score for the word “that” in this sentence is calculated as (2/9) * log(9/4), yielding a value of 1.078.</p>
+<p>To compute TF-IDF for the entire corpus, the process can be efficiently executed using the quanteda package. This package takes the original Document-Feature Matrix (DFM) object, containing 6,871 documents and 8,470 features, and applies the necessary log transformation to derive the TF-IDF values for the entire corpus. Words with low TF-IDF score are commonly used words in the corpus. While words with a high TF-IDF score denote the significance of the word in within that document.</p>
+<hr>
+<p>Table 5 shows that the most unique and significant word across the entire corpus is <strong>compatriot,</strong> followed by <strong>honour.</strong></p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 5: Ten 10 unique or highly significant words across the entire collection SONA corpus</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">compatriot</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">honour</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">speaker</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">thank</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">member</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">south</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">year</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">govern</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">african</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">madam</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">138.8761</td>
+<td style="text-align: right;">77.36564</td>
+<td style="text-align: right;">60.67334</td>
+<td style="text-align: right;">58.79029</td>
+<td style="text-align: right;">58.67654</td>
+<td style="text-align: right;">58.50207</td>
+<td style="text-align: right;">54.93527</td>
+<td style="text-align: right;">52.70048</td>
+<td style="text-align: right;">52.17351</td>
+<td style="text-align: right;">50.54257</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<hr>
+<p>The feature space of the corpus was reduces by keeping only features with a total TD-IDF score of at least 10 across all documents. This resulted in a drop of feature space from 8470 to 285.</p>
+<p><strong>Feed Forward Neural Network</strong></p>
+<p>The data preprocessing steps applied to the Bag of Words (BoW) model were also utilized for the TF-IDF model. Additionally, the hyperparameters used for the neural network in the TF-IDF model remained the same, with the sole exception being that the first hidden layer now consists of 100 neurons.</p>
+<p>The test accuracy of the model was 45.32%</p>
+<p><strong>Logistic Regression and SVM</strong></p>
+<p>The Logistic Regression and Support Vector Machine (SVM) models were both trained with identical hyperparameters as those used for the Bag of Words (BoW) model.</p>
+<p>The test accuracy of the logistic regression is 47.28% and 30.28% for SVM.</p>
+<p><strong>Comparing BoW Model and TF-IDF Model</strong></p>
+<p>Just like with the Bag of Words (BoW) algorithm, logistic regression outperforms SVM and Neural Network in predicting presidential speeches when utilizing the log transformation of word frequency.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 6: Comparing performance of models fitted using BoW and TD-IDF text processing techniques</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Neural Network</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Logistic Regression</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Support Vector Machine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">BoW:frequency count</td>
+<td style="text-align: right;">37.84</td>
+<td style="text-align: right;">43.72</td>
+<td style="text-align: right;">38.63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">TF-TDF</td>
+<td style="text-align: right;">45.32</td>
+<td style="text-align: right;">47.28</td>
+<td style="text-align: right;">30.28</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>Table 6 shows that the TD-IDF model is generally superior in performance to the Bag of Words (BoW) model across various aspects, but there is an exception for the Support Vector Machine (SVM). This discrepancy can be attributed to several factors. The choice of hyperparameters may not have been optimized for the TD-IDF model, leading to suboptimal results. It’s also possible that certain characteristics of the TD-IDF data do not align well with the inherent assumptions of the SVM algorithm.</p>
+<p>Unlike the logistic regression model fitted on BoW data, the logistic regression fitted on TD-IDF corpus was able to assign predictions to De Klerk and Motlanthe. Out of the 15 distinct words spoken by De Klerk, the model was able to predict 5 of the words correctly.This suggests that the TD-IDF model better captures the nuances of De Klerk’s speech patterns. Furthermore the test accuracy of words spoken by Ramaphosa increased to 55% compared to 50% using BoW model. The model can is able to identify his distinct communication style. The model also improved it’s ability to predict speech made my Mandela to 32% compared to 21% using BoW. TD-IDF model captures the unique language characteristics of Mandela more effectively.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table 7: Actual (row) vs Predicted (column) Results by logistic Regression on TD-IDF data</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">deKlerk</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mandela</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mbeki</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Motlanthe</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Ramaphosa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Zuma</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">deKlerk</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mandela</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">203</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mbeki</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">73</td>
+<td style="text-align: right;">323</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Motlanthe</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ramaphosa</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">207</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">377</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zuma</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">417</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="plagiarism-declaration" class="level1">
+<h1>Plagiarism declaration</h1>
+<p>I, Bahle Motshegoa, a student at the University of Cape Town in the Department of Statistical Sciences, with student number MTSNOB004, declare that:</p>
+<p>1. I know that plagiarism is wrong. Plagiarism is to use another’s work and pretend that it is one’s own.</p>
+<p>2. I have used a generally accepted citation and referencing style. Each contri- bution to, and quotation in, this report from the work(s) of other people has been attributed, and has been cited and referenced.</p>
+<p>3. This report is my own work.</p>
+<p>4. I have not allowed, and will not allow, anyone to copy my work with the intention of passing it on as his or her own work.</p>
+<p>5. I acknowledge that copying someone else’s assignment or essay, or part of it, is wrong, and declare that this is my own work.</p>
+<p>Signed on October 17, 2023:</p>
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="digital signature.jpg" class="img-fluid figure-img" width="28"></p>
+<figcaption class="figure-caption">Bahle Motshegoa</figcaption>
+</figure>
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
