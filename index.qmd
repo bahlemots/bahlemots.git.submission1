@@ -4,10 +4,760 @@ author: "Bahle Motshegoa (MTSNOB004)"
 date: last-modified
 ---
 
-This is a Quarto website.
+# Introduction
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+The State of the Nation Address (SONA) delivered by the President of South Africa is a significant annual event. It serves as a platform for the nation's leader to engage with citizens, government officials, and international observers. This address offers a pivotal opportunity for the President to assess the nation's current state, articulate government priorities, and lay out policies and plans for the future. It represents a moment that encapsulates the nation's aspirations in politics, society, and the economy.
 
-```{r}
-1 + 1
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(lubridate)
+library(tidytext)
+library(readtext)
+library(rpart) 
+library(quanteda) 
+library(kableExtra)
+library(quanteda.textplots)
+library(caret)
+library(splitTools)
+library(e1071) #for Naives bayes
+library(keras)
+library(e1071) #for svm
+library(naivebayes)
+tensorflow::set_random_seed(5)
+
+
 ```
+
+```{r data, echo=FALSE}
+
+data <- c()
+data[1] <-  readChar("sona data/1994_post_elections_Mandela.txt", nchars = 27050)
+data[2] <-  readChar("sona data/1994_pre_elections_deKlerk.txt", nchars = 12786)
+data[3] <-  readChar("sona data/1995_Mandela.txt", nchars = 39019)
+data[4] <-  readChar("sona data/1996_Mandela.txt", nchars = 39524)
+data[5] <-  readChar("sona data/1997_Mandela.txt", nchars = 37489)
+data[6] <-  readChar("sona data/1998_Mandela.txt", nchars = 45247)
+data[7] <-  readChar("sona data/1999_post_elections_Mandela.txt", nchars = 34674)
+data[8] <-  readChar("sona data/1999_pre_elections_Mandela.txt", nchars = 41225)
+data[9] <-  readChar("sona data/2000_Mbeki.txt", nchars = 37552)
+data[10] <- readChar("sona data/2001_Mbeki.txt", nchars = 41719)
+data[11] <- readChar("sona data/2002_Mbeki.txt", nchars = 50544)
+data[12] <- readChar("sona data/2003_Mbeki.txt", nchars = 58284)
+data[13] <- readChar("sona data/2004_post_elections_Mbeki.txt", nchars = 34590)
+data[14] <- readChar("sona data/2004_pre_elections_Mbeki.txt", nchars = 39232)
+data[15] <- readChar("sona data/2005_Mbeki.txt", nchars = 54635)
+data[16] <- readChar("sona data/2006_Mbeki.txt", nchars = 48643)
+data[17] <- readChar("sona data/2007_Mbeki.txt", nchars = 48641)
+data[18] <- readChar("sona data/2008_Mbeki.txt", nchars = 44907)
+data[19] <- readChar("sona data/2009_post_elections_Zuma.txt", nchars = 31101)
+data[20] <- readChar("sona data/2009_pre_elections_ Motlanthe.txt", nchars = 47157)
+data[21] <- readChar("sona data/2010_Zuma.txt", nchars = 26384)
+data[22] <- readChar("sona data/2011_Zuma.txt", nchars = 33281)
+data[23] <- readChar("sona data/2012_Zuma.txt", nchars = 33376)
+data[24] <- readChar("sona data/2013_Zuma.txt", nchars = 36006)
+data[25] <- readChar("sona data/2014_post_elections_Zuma.txt", nchars = 29403)
+data[26] <- readChar("sona data/2014_pre_elections_Zuma.txt", nchars = 36233)
+data[27] <- readChar("sona data/2015_Zuma.txt", nchars = 32860)
+data[28] <- readChar("sona data/2016_Zuma.txt", nchars = 32464)
+data[29] <- readChar("sona data/2017_Zuma.txt", nchars = 35981)
+data[30] <- readChar("sona data/2018_Ramaphosa.txt", nchars = 33290)
+data[31] <- readChar("sona data/2019_post_elections_Ramaphosa.txt", nchars = 42112)
+data[32] <- readChar("sona data/2019_pre_elections_Ramaphosa.txt", nchars = 56960)
+data[33] <- readChar("sona data/2020_Ramaphosa.txt", nchars = 47910)
+data[34] <- readChar("sona data/2021_Ramaphosa.txt", nchars = 43352)
+data[35] <- readChar("sona data/2022_Ramaphosa.txt", nchars = 52972)
+data[36] <- readChar("sona data/2023_Ramaphosa.txt", nchars = 52972)
+
+
+filenames <- c('1994_post_elections_Mandela.txt', '1994_pre_elections_deKlerk.txt', '1995_Mandela.txt', '1996_Mandela.txt', '1997_Mandela.txt', '1998_Mandela.txt', 
+               '1999_post_elections_Mandela.txt', '1999_pre_elections_Mandela.txt', '2000_Mbeki.txt', '2001_Mbeki.txt', '2002_Mbeki.txt', '2003_Mbeki.txt', 
+               '2004_post_elections_Mbeki.txt', '2004_pre_elections_Mbeki.txt', '2005_Mbeki.txt', '2006_Mbeki.txt', '2007_Mbeki.txt', '2008_Mbeki.txt', 
+               '2009_post_elections_Zuma.txt', '2009_pre_elections_ Motlanthe.txt', '2010_Zuma.txt', '2011_Zuma.txt', '2012_Zuma.txt', '2013_Zuma.txt', 
+               '2014_post_elections_Zuma.txt', '2014_pre_elections_Zuma.txt', '2015_Zuma.txt', '2016_Zuma.txt', '2017_Zuma.txt', '2018_Ramaphosa.txt', 
+               '2019_post_elections_Ramaphosa.txt', '2019_pre_elections_Ramaphosa.txt', '2020_Ramaphosa.txt', '2021_Ramaphosa.txt', '2022_Ramaphosa.txt',
+               "2023_Ramaphosa.txt")
+
+
+speech <- data.frame(filename = filenames, speech = data, stringsAsFactors = FALSE)
+
+```
+
+```{r prep, echo=FALSE}
+
+#2. Data preprocessing: 
+# Tokenization,Text cleaning,
+# Lemmatization or stemming: Reducing words to their base form.
+# Handling missing data (if any).
+# Encoding categorical variables (e.g., president names).
+
+#Extract information about the source of speech from the filename
+
+speech <- speech %>%
+  mutate(president=str_remove_all(str_extract(filename, "[dA-Z].*\\."), "\\."))
+
+#check unique president name
+check <- unique(speech$president)
+
+#number of speeches per president
+pres_speech <- speech %>% group_by(president) %>% summarise(speech=n())
+
+
+```
+
+In the context of this research project, we have access to a dataset comprising a total of 36 text files, each representing speeches delivered by six different presidents during the period from 1994 to 2023. The dataset includes `r pres_speech[1,2]` speeches from Nelson Mandela, `r pres_speech[2,2]` from Mbeki, `r pres_speech[3,2]` from Motlanthe, `r pres_speech[3,2]` from Ramaphosa, `r pres_speech[5,2]` from Zuma, and `r pres_speech[6,2]` from de Klerk. The examination reveals an imbalance within the data, highlighting the importance of implementing a stratified sampling approach during the division of the data into training and test sets. This approach involves stratifying the samples based on the target variable (president) to guarantee that the selected data accurately mirrors the characteristics of the original dataset.
+
+The primary objective of this analysis is to utilize the text data alongside a feed forward neural network to predict which of the six presidents delivered a specific speech. The outcomes generated by the neural network will be compared with those of other predictive models, such as a Naive Bayes classifier and a Support Vector Machine. This comparative analysis aims to enhance our understanding of the most effective approach for attributing speeches to their respective presidents based on the text content.
+
+```{r echo=FALSE}
+
+# kable(t(pres_speech))
+
+```
+
+# Data Preparation
+
+```{r prep2, echo=FALSE}
+
+#extract each unique sentence from the speech
+final_data <- speech %>%
+  mutate(president=str_remove_all(str_extract(filename, "[dA-Z].*\\."), "\\.")) %>% 
+  rowwise() %>%
+  mutate(
+    sentences = list(strsplit(speech, "\n\n")[[1]][-(1:2)])
+  ) %>%
+  select(sentences, president) %>%
+  unnest(sentences)
+
+#make president a factor, create sentence count variale
+final_data$ID <- row.names(final_data)
+final_data <- final_data %>% relocate(ID,.before = sentences) %>% 
+  mutate(president=as.factor(president),
+         ID=as.numeric(ID))
+
+#number of sentences per president
+sentence_by_president <-t(as.data.frame((table(final_data$president))))
+
+```
+
+The initial phase of data preparation involved parsing each speech but excluding the first two lines from each speech as they contain the date the speech was rendered and the welcome address. The speeches were then broken down into individual sentences, and attributed to the respective president. Additionally, a unique sentence ID was assigned to each parsed sentence. As a result, the finalized dataset comprises a total of `r nrow(final_data)` sentences. President Zuma rendered most of the sentences, accounting for `r round(as.numeric(sentence_by_president[2,6])*100/nrow(final_data))`% of all sentences in the database, followed by `r round(as.numeric(sentence_by_president[2,5])*100/nrow(final_data))`% from President Ramaphosa. President Motlanthe and President De Klerk had the least sentence, accounting only for only `r round(as.numeric(sentence_by_president[2,4])*100/nrow(final_data))`% and `r round(as.numeric(sentence_by_president[2,1])*100/nrow(final_data))`% of all sentences, respectively.
+
+```{r, echo=FALSE}
+
+kable(sentence_by_president, row.names = FALSE,
+      caption = "Table 1. Total number of sentences rendered in a speech per president") 
+```
+
+The next step of data preparation involved the conversion of sentences through methods such as tokenization, stemming, and removing stop words in order to render the data more suitable for analysis. This process aims to enhance the quality and structure of the textual data for further analysis. The pre-processing techniques employed are as detailed below:
+
+## Tokenization
+
+This is a process of breaking down a text into individual words or tokens. Each word or punctuation mark is considered a token. For instance, the sentence "The time will come when our nation will honour" would be tokenized into (""The", "time", "will", "come", "when", "our","nation","will","honour").
+
+### Stemming
+
+This is text normalization technique where words are reduced to their root or base form. This helps to group words with the same root together. For example in the data the word "thoughts" is stemmed to "thought", and "memory" is stemmed to "memori".
+
+### Removing stop words
+
+Removing stop words is a process of eliminating common words like "the," "and," "is," which don't carry much meaning in text analysis and may skew our results if included in the analysis. For example, in our data the token ("the" "time" "will" "come" "when" "our" "nation" "will" "honour" "the" "memory"), will be reduced to ("time" "come" "nation" "honour" "memory" "sons" "daughters" "mothers").
+
+To proces the data using the techniques detailed above, the data corpus object using the quanteda package. A corpus is a collection of sentences. The corpus object was then converted into tokens , removing punctuation. The tokens were converted into a "Document-Feature Matrix" (dfm) which is a crucial component for analyzing and modeling text data. In this process the tokens are converted into a lowercase, stemmed and stop words are removed.
+
+The output below shows that the dfm object has 6 871 documents and 8 470 features (total number of unique words). The dfm matrix contains a total 113 584 word, but only 8 471 words are unique. However, the data is 99.81% sparse, this means that 99.86% of the values in the matrix are 0. This is a very high number. This tells us that only 0.19% of the 6 871 sentences(documents) contains all the 8 470 words.
+
+------------------------------------------------------------------------
+
+```{r dfm, echo=FALSE, message=FALSE,warning=FALSE}
+fulltext = corpus(final_data,text_field = "sentences")
+
+
+tokens <- tokens(fulltext, remove_punct = TRUE)
+toks <- dfm(tokens)%>%                           ## structure tokens as Document Term Matrix
+dfm_tolower() %>%                     ## preprocessing: lowercase
+dfm_wordstem() %>%                  ## preprocessing: stemming
+dfm_remove(stopwords('english'))
+
+toks
+
+```
+
+------------------------------------------------------------------------
+
+# Feature selection
+
+### Reducing sparsity
+
+One can reduce the sparseness of the matrix by tuning the **dfm** parameters. In this analysis we are only going to consider words that appear in at least 200 of the documents, this means the word must appear at least 200 times. This reduces the feature space from 8 470 to 75 and reduces sparsity from 99,81% to 94.62%. The data is still extremely sparse, but the higher we set the **min_docFreq** parameter, the more features we will loose.
+
+------------------------------------------------------------------------
+
+```{r toks2, echo=FALSE, message=FALSE,warning=FALSE}
+
+toks2 <- dfm_trim(toks,min_docfreq = 200)
+toks2
+
+```
+
+------------------------------------------------------------------------
+
+The dfm object is a Bag-of-Words (BoW) matrix which contains 75 words (feature) and can be converted into a dataframe. Table 2 shows that in one of the speeches rendered by Ramaphosa, he mentioned the word *south* 10 times, while Mbeki mentioned the word *time* 4 times in one of his speeches.
+
+```{r bow, echo=FALSE}
+
+#convert to dataframe example
+df <-convert(toks2, to = "data.frame") 
+#replace first column by target
+df[,1] <- final_data$president
+#rename the first column which is our target
+colnames(df)[1] <- "president"
+df$speech_id <- rownames(df)
+
+#example for illustration
+table <- df[c(6874,2094),c(1:8)]
+kable(table,caption = "Table 2: Bag of words illustration of the matrix",
+      row.names = FALSE)
+```
+
+```{r top15, echo=FALSE}
+
+top_features <- t(as.data.frame(topfeatures(toks2, n = 10)))
+kable(top_features, caption = "Table 3: Ten most used words in the SONA dataset",
+      row.names = FALSE)
+
+```
+
+A further analysis was conducted to explore the top `r ncol(top_features)` words. Table 3 shows that the words **year**, **govern** (stemmed from government), **south** are the 3 most used words in the dataset. Figure 1 shows the top words (relative frequency) used by each president. The size of each word corresponds to its relative frequency or importance within the group's text data. Larger words are relatively more frequent or prominent, while smaller words are less so. For example, President Zuma used the word **Work** more often in his speech, President Mbeki used the word **programm** more often in his speech, while the most common word choice for President Ramaphosa are **business** and **invest**.
+
+```{r , echo=FALSE,fig.cap="Figure1: Relative frequency of words used by each president"}
+
+set.seed(5)
+
+toks2 %>% dfm_group(president) %>% dfm_trim(min_termfreq = 10, verbose = FALSE) %>%
+textplot_wordcloud(comparison = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+# Fitting the Model
+
+In this section, we conduct a comparative analysis of three predictive algorithms: Neural Network, Naive Bayes, and a Logistic Regression. We evaluate their performance using three distinct text processing techniques, which are as follows:
+
+1.  **Bag of Words using frequency word count**: This technique involves representing text data by creating a vocabulary of unique words and counting the frequency of each word in a document.
+2.  **ID-TDF(Term Frequency-Inverse Document Frequency):** TF-IDF is a numerical statistic used in text mining and information retrieval to evaluate the importance of a word within a document relative to a collection of documents. It quantifies the relevance of a term in a specific document compared to its relevance across a corpus of documents.
+
+## Model 1: Bag-of-Words: Frequency of words count
+
+The input data for this model represent individual features, and the observations denote the frequency of each word's appearance within each sentence spoken by each president (the target). The model is trained on a reduced dataset, including only those features that occur in at least 200 sentences. This results in a feature space consisting of 74 unique words and a dataset of 6,877 observations. The data is split into 3 datasets, the training set (60%), validation set (20%) and the test set (20%).
+
+Considering that the data employed in model 1 encompasses the absolute counts of word occurrences within each observation, the training dataset is subjected to standardization. This process aims to mitigate the undue impact of words with a broader range of values. For instance, the word "nation" appears in sentences ranging from 0 to 18 times, whereas "well" spans from 0 to 2 uses. The validation and test datasets are likewise standardized using the means and standard deviations obtained from the training data. The target variable is converted into a vector of 1 and 0 using a one hot encoding technique which transforms the categorical labels into a binary matrix format.
+
+------------------------------------------------------------------------
+
+**Feed Forward Neural Network**
+
+The first model fitted is a neural network designed for a multi-class classification problem with 6 classes. The ReLU activation function is used in the hidden layers to introduce non-linearity, and the softmax activation function is used in the output layer to produce class probabilities.
+
+The categorical cross-entropy loss is chosen as an loss function for multi-class classification tasks, and the Adam optimizer with a learning rate of 0.01 is used to update the model's weights during training.
+
+```{r fit1, message=FALSE,warning=TRUE,echo=FALSE, results='hide'}
+
+set.seed(5)
+inds <- partition(df$president, p = c(train = 0.6,valid = 0.2,test = 0.2))
+
+#remove the speech_id column
+df$speech_id <- NULL
+train <- df[inds$train, ]
+valid <- df[inds$valid, ]
+test <- df[inds$test, ]
+
+#extract the features
+x_train <-as.matrix(train[,2:ncol(train)])
+x_train <- apply(x_train, 2, as.numeric)  #convert features back to numeric form
+
+x_test <- as.matrix(test[,c(-1)])
+x_test <- apply(x_test, 2, as.numeric)
+
+x_valid <- as.matrix(valid[,c(-1)])
+x_valid <- apply(x_valid, 2, as.numeric)
+
+#scaling the data
+x_train <- scale(x_train)
+
+#checking that mean is 0 or close to 0, and std is 1
+check <- apply(x_train, 2, mean)
+check2 <-  apply(x_train, 2, sd)
+
+#now use results from x_train to scale the test and validation samples
+#(original means and std of x_train are stored in attributes)
+x_test <- scale(x_test, center = attr(x_train, "scaled:center"), 
+                scale = attr(x_train, "scaled:scale"))
+
+x_valid <- scale(x_valid, center = attr(x_train, "scaled:center"), 
+                scale = attr(x_train, "scaled:scale"))
+
+#convert target to binary: one hot encoding for target and must start from zero
+target <- as.integer(factor(df$president)) - 1
+
+y_train <-target[inds$train]
+y_train <- to_categorical(y_train)
+
+y_test <-target[inds$test]
+y_test <- to_categorical(y_test)
+
+y_valid <-target[inds$valid]
+y_valid <- to_categorical(y_valid)
+
+
+
+# fit a simple feedforward neural network
+model <- keras_model_sequential()
+
+# Add the input layer with 75 features
+model %>% 
+  layer_dense(units = 75, input_shape = ncol(x_train), activation = 'relu') %>% 
+  # Add the first hidden layer
+  layer_dense(units = 64, activation = 'relu') %>% 
+  # Add the second hidden layer
+  layer_dense(units = 32, activation = 'relu') %>% 
+  # Add the output layer with the number of classes (e.g., 2 for binary classification)
+  layer_dense(units = 6, activation = 'softmax')
+
+# Compile the model
+mod <- model %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_adam(learning_rate = 0.01),
+  metrics = c('accuracy'),
+)
+
+# Summary of the model
+model1_nn <- summary(mod)
+
+# Train the model 
+history <- mod %>% fit(
+  x = x_train,
+  y = y_train,
+  validation_data = list(x_valid, y_valid),  # Validation data
+  epochs = 50,  
+  batch_size = 32,  
+  verbose=FALSE
+)
+
+
+# Evaluate the model
+evaluation <- mod %>% evaluate(x_test, y_test)
+
+# Print the evaluation results
+# cat("Loss:", evaluation[1], "\n")
+# cat("Accuracy:", evaluation[2], "\n")
+
+#store test accuracy of the model
+results <- data.frame(matrix(NA,ncol=4,nrow=2))
+colnames(results) <- c("Model","Neural Network","Logistic Regression","Support Vector Machine")
+results$Model <- c("BoW:frequency count","TF-TDF")
+results[1,2] <- round((evaluation[2])*100,2)
+
+#confusion matrix of predictions
+y_test_hat <- mod %>% predict(x_test) %>% k_argmax() %>% as.numeric()
+
+confusion_table1 <- table(target[inds$test], y_test_hat)
+
+#nothing was predicted as speech by De Klerk, add column of zero for De Klerk
+confusion_table1 <- cbind(0,confusion_table1)
+
+actual_names <- levels(factor(df$president))
+predicted_names <- levels(factor(df$president))
+
+# Assign names to the confusion matrix using dimnames
+dimnames(confusion_table1) <- list(Actual = actual_names, Predicted=predicted_names)
+
+
+```
+
+The model underwent 50 training epochs with batches of 32 samples each. The model fit resulted in a validation accuracy of just `r round((evaluation[2])*100,2)`%, furthermore the neural network assigned non of the predictions to De Klerk.
+
+**Multinomial Logistic Regression**
+
+For the logistic regression, an output layer using activation = "softmax" was chosen as it is a appropriate for multi-class classification. It will provide class probabilities for each of the 6 classes. The loss function was also set to "categorical_crossentropy", which is the standard choice for multi-class problems.
+
+```{r logit1, echo=FALSE, results='hide'}
+
+
+# Create a multi-class logistic regression model
+logistic_mod <- keras_model_sequential() %>%
+  layer_dense(units = 6, activation = "softmax", input_shape = ncol(x_train))
+
+# Compile the model with appropriate hyperparameters for multi-class classification
+mod2 <- logistic_mod %>% compile(
+  optimizer = "rmsprop",  
+  loss = "categorical_crossentropy",  # Cross-entropy loss for multi-class
+  metrics = c("accuracy")
+)
+
+# Train the model 
+history <- mod2 %>% fit(
+  x = x_train,
+  y = y_train,
+  validation_data = list(x_valid, y_valid),  # Validation data
+  verbose=FALSE
+)
+
+# Evaluate the model
+evaluation2 <- mod2 %>% evaluate(x_test, y_test)
+results[1,3] <- round((evaluation2[2])*100,2)
+
+#confusion matrix of predictions
+y_test_hat <- mod2 %>% predict(x_test) %>% k_argmax() %>% as.numeric()
+
+confusion_table2 <- table(target[inds$test], y_test_hat)
+
+#Logit also predicted non of the speech as speech by De Klerk, or motlhante, add column of zero for De Klerk
+confusion_table2 <- cbind(0,confusion_table2[,1:2],0,confusion_table2[,3:4])
+
+actual_names <- levels(factor(df$president))
+predicted_names <- levels(factor(df$president))
+
+# Assign names to the confusion matrix using dimnames
+dimnames(confusion_table2) <- list(Actual = actual_names, Predicted=predicted_names)
+
+#create column storing the total words in the corpus said by each president
+confusion_table2 <- cbind(confusion_table2, Total = rowSums(confusion_table2))
+
+
+```
+
+With a logistic regression the model validation accuracy is `r round((evaluation2[2])*100,2)`%, this is a `r round((results[1,3]-results[1,2])*100,0)` basis points uplift in performance compared to the neural network. The logistic regression model assigned none of the predictions to Motlhante and De Klerk.
+
+**Support Vector Machine**
+
+A support vector machine (SVM) model was trained with a radial kernel, which is a suitable choice when there's uncertainty about the data's underlying structure. The radial kernel is adept at capturing complex decision boundaries, which is especially important in multi-class classification scenarios where linear boundaries may not suffice. A low gamma value (0.1) was selected to create a more lenient decision boundary, a valuable approach for multi-class datasets with potential class overlap. To mitigate overfitting, the cost parameter was set to a high value of 10, increasing the penalty for misclassification. SVM can effectively handle the categorical target variable in its original form, eliminating the need for one-hot encoding to transform the target into a binary matrix.
+
+```{r svm1, echo=FALSE, results='hide'}
+
+set.seed(5)
+
+dt <- data.frame(x_train,df[inds$train,"president"])
+colnames(dt)[76] <- "president"
+svm1 <- svm(president~., data= dt, 
+          method="C-classification", kernal="radial", 
+          gamma=0.1, cost=10)
+
+#predict on the validation sample and measure the accuracy
+dt_v <- data.frame(x_valid,df[inds$valid,"president"])
+colnames(dt_v)[76] <- "president"
+y_pred = predict(svm1, newdata = dt_v)
+
+cm = table(dt_v$president, y_pred)
+accuracy = (cm[1,1] + cm[2,2]+cm[3,3]+
+                cm[4,4]+cm[5,5]+cm[6,6]) / nrow(dt_v)
+
+
+#predict on the test sample
+dt_t <- data.frame(x_test,df[inds$test,"president"])
+colnames(dt_t)[76] <- "president"
+y_pred = predict(svm1, newdata = dt_t)
+confusion_table3 = table(dt_t$president, y_pred)
+ 
+#add results to the result dataframe
+results[1,4] <- round((accuracy)*100,2)
+
+```
+
+The model's validation accuracy is `r round(accuracy*100,0)` %. This is a `r round((results[1,4]-results[1,2])*100,0)` basis point uplift from the neural network, but lower that the results obtained using a logistic regression.
+
+------------------------------------------------------------------------
+
+For the BoW frequency count text processing technique, the logistic regression yields superior results. Table 4 shows that the algorithm is unable to assign any prediction to De Klerk and Motlanthe. The model performs the best when predicted words by President Zuma. The president has `r confusion_table2[6,7]` words in the corpus, and the model accurately predicted `r round((confusion_table2[6,6]/confusion_table2[6,7])*100,0)`% (test accuracy) . President Ramaphosa has `r confusion_table2[5,7]` words in the corpus, and the model accurately predicted `r round((confusion_table2[5,5]/confusion_table2[5,7])*100,0)`% of his words. The model is ineffective at predicting words said by President Mandela. The president has `r confusion_table2[2,7]` words in the corpus, however the model only accuracy predicts `r round((confusion_table2[2,2]/confusion_table2[2,7])*100,0)`% of those words.
+
+```{r top_bow_alg, warning=FALSE,echo=FALSE}
+
+
+kable(confusion_table2,caption = "Table 4: Actual (row) vs Predicted (column) Results by logistic Regression on BoW",
+      row.names = TRUE)
+```
+
+## Model 2: TF-IDF: Weighted Frequency Count
+
+TF-IDF, or Term Frequency-Inverse Document Frequency, is a numerical representation that combines two key components. It involves a log transformation of the word frequency count within a document, and it also accounts for the word's significance across the entire corpus.
+
+For example, consider the sentence "The certainties that come with age tell me that," which consists of a total of 9 words. The word "that" appears 2 times in this sentence. To calculate the Term Frequency (TF) for "that" in this sentence, you take the ratio of its frequency to the total words, resulting in (2/9).
+
+However, it's equally important to consider how often the word "that" appears across all sentences in the corpus. If, for instance, it appears in only 4 out of 9 sentences, the Inverse Document Frequency (IDF) is determined as log(9/4). Consequently, the TF-IDF score for the word "that" in this sentence is calculated as (2/9) \* log(9/4), yielding a value of 1.078.
+
+To compute TF-IDF for the entire corpus, the process can be efficiently executed using the quanteda package. This package takes the original Document-Feature Matrix (DFM) object, containing 6,871 documents and 8,470 features, and applies the necessary log transformation to derive the TF-IDF values for the entire corpus. Words with low TF-IDF score are commonly used words in the corpus. While words with a high TF-IDF score denote the significance of the word in within that document.
+
+------------------------------------------------------------------------
+
+Table 5 shows that the most unique and significant word across the entire corpus is **compatriot,** followed by **honour.**
+
+```{r, echo=FALSE}
+
+toks_tfid <- dfm_tfidf(toks,  scheme_tf = "prop",scheme_df="inverse")
+
+top_features <- t(as.data.frame(topfeatures(toks_tfid, n = 10)))
+kable(top_features, caption = "Table 5: Ten 10 unique or highly significant words across the entire collection SONA corpus",
+      row.names = FALSE)
+
+```
+
+------------------------------------------------------------------------
+
+```{r ,echo=FALSE}
+
+set.seed(5)
+
+# Sum the TF-IDF scores for each word across all sentences
+summed_tfidf <- colSums(toks_tfid)
+
+# Step 3: Subset the words with a summed TF-IDF score greater than 5
+selected_words <- names(summed_tfidf[summed_tfidf > 10])
+
+#convert to dataframe example
+df <-convert(toks_tfid, to = "data.frame") 
+#replace first column by target
+df[,1] <- final_data$president
+#rename the first column which is our target
+colnames(df)[1] <- "president"
+
+#subset only for words with sum score greater that 10
+df <- df[,c("president",selected_words)] 
+df$speech_id <- rownames(df)
+```
+
+The feature space of the corpus was reduces by keeping only features with a total TD-IDF score of at least 10 across all documents. This resulted in a drop of feature space from 8470 to `r ncol(df)-2`.
+
+**Feed Forward Neural Network**
+
+The data preprocessing steps applied to the Bag of Words (BoW) model were also utilized for the TF-IDF model. Additionally, the hyperparameters used for the neural network in the TF-IDF model remained the same, with the sole exception being that the first hidden layer now consists of 100 neurons.
+
+```{r nn2, message=FALSE,warning=TRUE,echo=FALSE, results='hide'}
+
+set.seed(5)
+# inds <- partition(df$president, p = c(train = 0.6,valid = 0.2,test = 0.2))
+
+#remove the speech_id column
+df$speech_id <- NULL
+train <- df[inds$train, ]
+valid <- df[inds$valid, ]
+test <- df[inds$test, ]
+
+#extract the features
+x_train <-as.matrix(train[,2:ncol(train)])
+x_train <- apply(x_train, 2, as.numeric)  #convert features back to numeric form
+
+x_test <- as.matrix(test[,c(-1)])
+x_test <- apply(x_test, 2, as.numeric)
+
+x_valid <- as.matrix(valid[,c(-1)])
+x_valid <- apply(x_valid, 2, as.numeric)
+
+#scaling the data
+x_train <- scale(x_train)
+
+#checking that mean is 0 or close to 0, and std is 1
+check <- apply(x_train, 2, mean)
+check2 <-  apply(x_train, 2, sd)
+
+#now use results from x_train to scale the test and validation samples
+#(original means and std of x_train are stored in attributes)
+x_test <- scale(x_test, center = attr(x_train, "scaled:center"), 
+                scale = attr(x_train, "scaled:scale"))
+
+x_valid <- scale(x_valid, center = attr(x_train, "scaled:center"), 
+                scale = attr(x_train, "scaled:scale"))
+
+#convert target to binary: one hot encoding for target and must start from zero
+target <- as.integer(factor(df$president)) - 1
+
+y_train <-target[inds$train]
+y_train <- to_categorical(y_train)
+
+y_test <-target[inds$test]
+y_test <- to_categorical(y_test)
+
+y_valid <-target[inds$valid]
+y_valid <- to_categorical(y_valid)
+
+
+
+# fit a simple feedforward neural network
+model <- keras_model_sequential()
+
+# Add the input layer with 75 features
+model %>% 
+  layer_dense(units = 150, input_shape = ncol(x_train), activation = 'relu') %>% 
+  # Add the first hidden layer
+  layer_dense(units = 64, activation = 'relu') %>% 
+  # Add the second hidden layer
+  layer_dense(units = 32, activation = 'relu') %>% 
+  # Add the output layer with the number of classes (e.g., 2 for binary classification)
+  layer_dense(units = 6, activation = 'softmax')
+
+# Compile the model
+mod <- model %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_adam(learning_rate = 0.01),
+  metrics = c('accuracy'),
+)
+
+# Summary of the model
+model1_nn <- summary(mod)
+
+# Train the model 
+history <- mod %>% fit(
+  x = x_train,
+  y = y_train,
+  validation_data = list(x_valid, y_valid),  # Validation data
+  epochs = 50,  
+  batch_size = 32,  
+  verbose=FALSE
+)
+
+
+# Evaluate the model
+evaluation <- mod %>% evaluate(x_test, y_test)
+
+# Print the evaluation results
+# cat("Loss:", evaluation[1], "\n")
+# cat("Accuracy:", evaluation[2], "\n")
+
+#store test accuracy of the model
+results[2,2] <- round((evaluation[2])*100,2)
+
+#confusion matrix of predictions
+y_test_hat <- mod %>% predict(x_test) %>% k_argmax() %>% as.numeric()
+
+confusion_table4 <- table(target[inds$test], y_test_hat)
+
+actual_names <- levels(factor(df$president))
+predicted_names <- levels(factor(df$president))
+
+# Assign names to the confusion matrix using dimnames
+dimnames(confusion_table4) <- list(Actual = actual_names, Predicted=predicted_names)
+
+```
+
+The test accuracy of the model was `r round((evaluation[2])*100,2)`%
+
+**Logistic Regression and SVM**
+
+The Logistic Regression and Support Vector Machine (SVM) models were both trained with identical hyperparameters as those used for the Bag of Words (BoW) model.
+
+```{r logit2, echo=FALSE, results='hide'}
+
+
+# Create a multi-class logistic regression model
+logistic_mod <- keras_model_sequential() %>%
+  layer_dense(units = 6, activation = "softmax", input_shape = ncol(x_train))
+
+# Compile the model with appropriate hyperparameters for multi-class classification
+mod2 <- logistic_mod %>% compile(
+  optimizer = "rmsprop",  
+  loss = "categorical_crossentropy",  # Cross-entropy loss for multi-class
+  metrics = c("accuracy")
+)
+
+# Train the model 
+history <- mod2 %>% fit(
+  x = x_train,
+  y = y_train,
+  validation_data = list(x_valid, y_valid),  # Validation data
+  verbose=FALSE
+)
+
+# Evaluate the model
+evaluation2 <- mod2 %>% evaluate(x_test, y_test)
+results[2,3] <- round((evaluation2[2])*100,2)
+
+#confusion matrix of predictions
+y_test_hat <- mod2 %>% predict(x_test) %>% k_argmax() %>% as.numeric()
+
+confusion_table2 <- table(target[inds$test], y_test_hat)
+
+actual_names <- levels(factor(df$president))
+predicted_names <- levels(factor(df$president))
+
+# Assign names to the confusion matrix using dimnames
+dimnames(confusion_table2) <- list(Actual = actual_names, Predicted=predicted_names)
+
+#create column storing the total words in the corpus said by each president
+confusion_table2 <- cbind(confusion_table2, Total = rowSums(confusion_table2))
+
+```
+
+```{r svm2, echo=FALSE, results='hide'}
+
+set.seed(5)
+
+dt <- data.frame(x_train,df[inds$train,"president"])
+colnames(dt)[286] <- "president"
+svm1 <- svm(president~., data= dt, 
+          method="C-classification", kernal="radial", 
+          gamma=0.1, cost=10)
+
+#predict on the validation sample and measure the accuracy
+dt_v <- data.frame(x_valid,df[inds$valid,"president"])
+colnames(dt_v)[286] <- "president"
+y_pred = predict(svm1, newdata = dt_v)
+
+cm = table(dt_v$president, y_pred)
+accuracy = (cm[1,1] + cm[2,2]+cm[3,3]+
+                cm[4,4]+cm[5,5]+cm[6,6]) / nrow(dt_v)
+
+
+#predict on the test sample
+dt_t <- data.frame(x_test,df[inds$test,"president"])
+colnames(dt_t)[286] <- "president"
+y_pred = predict(svm1, newdata = dt_t)
+confusion_table3 = table(dt_t$president, y_pred)
+ 
+#add results to the result dataframe
+results[2,4] <- round((accuracy)*100,2)
+
+```
+
+The test accuracy of the logistic regression is `r round((evaluation2[2])*100,2)`% and `r round((accuracy)*100,2)`% for SVM.
+
+**Comparing BoW Model and TF-IDF Model**
+
+Just like with the Bag of Words (BoW) algorithm, logistic regression outperforms SVM and Neural Network in predicting presidential speeches when utilizing the log transformation of word frequency.
+
+```{r final, warning=FALSE,echo=FALSE}
+
+kable(results,caption = "Table 6: Comparing performance of models fitted using BoW and TD-IDF text processing techniques",
+      row.names = TRUE)
+
+```
+
+Table 6 shows that the TD-IDF model is generally superior in performance to the Bag of Words (BoW) model across various aspects, but there is an exception for the Support Vector Machine (SVM). This discrepancy can be attributed to several factors. The choice of hyperparameters may not have been optimized for the TD-IDF model, leading to suboptimal results. It's also possible that certain characteristics of the TD-IDF data do not align well with the inherent assumptions of the SVM algorithm.
+
+Unlike the logistic regression model fitted on BoW data, the logistic regression fitted on TD-IDF corpus was able to assign predictions to De Klerk and Motlanthe. Out of the 15 distinct words spoken by De Klerk, the model was able to predict 5 of the words correctly.This suggests that the TD-IDF model better captures the nuances of De Klerk's speech patterns. Furthermore the test accuracy of words spoken by Ramaphosa increased to 55% compared to 50% using BoW model. The model can is able to identify his distinct communication style. The model also improved it's ability to predict speech made my Mandela to 32% compared to 21% using BoW. TD-IDF model captures the unique language characteristics of Mandela more effectively.
+
+```{r pred_fin, warning=FALSE,echo=FALSE}
+
+
+kable(confusion_table2,caption = "Table 7: Actual (row) vs Predicted (column) Results by logistic Regression on TD-IDF data",
+      row.names = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+# Plagiarism declaration
+
+I, Bahle Motshegoa, a student at the University of Cape Town in the Department of Statistical Sciences, with student number MTSNOB004, declare that:
+
+1\. I know that plagiarism is wrong. Plagiarism is to use another's work and pretend that it is one's own.
+
+2\. I have used a generally accepted citation and referencing style. Each contri- bution to, and quotation in, this report from the work(s) of other people has been attributed, and has been cited and referenced.
+
+3\. This report is my own work.
+
+4\. I have not allowed, and will not allow, anyone to copy my work with the intention of passing it on as his or her own work.
+
+5\. I acknowledge that copying someone else's assignment or essay, or part of it, is wrong, and declare that this is my own work.
+
+Signed on October 17, 2023:
+
+![Bahle Motshegoa](digital%20signature.jpg){fig-align="left" width="28"}
